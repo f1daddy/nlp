@@ -1,0 +1,49 @@
+documents = [
+    "the sky is blue",
+    "the sun is bright",
+    "the sun in the sky is bright",
+    "we can see the shining sun, the bright sun"
+]
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer = CountVectorizer()
+X_bow= vectorizer.fit_transform(documents)
+
+print("Feature names:", vectorizer.get_feature_names_out())
+print("Count Matrix:\n", X_bow.toarray())
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorizer_norm= TfidfVectorizer(use_idf= False, norm='l2')
+X_norm_bow= vectorizer_norm.fit_transform(documents)
+
+print("Normalized Count Matrix:\n", X_norm_bow.toarray())
+
+
+vectorizer_tfidf = TfidfVectorizer()
+X_tfidf = vectorizer_tfidf.fit_transform(documents)
+
+print("TF-IDF Matrix:\n", X_tfidf.toarray())
+
+
+from gensim.models import Word2Vec
+import nltk
+nltk.download('punkt')
+from nltk.tokenize import word_tokenize
+
+tokenized_docs= [word_tokenize(doc.lower()) for doc in documents]
+
+model = Word2Vec(sentences= tokenized_docs, vector_size= 100, window=5, min_count=1, workers= 4)
+
+
+print("vector for 'bright':\n", model.wv['bright'])
+
+import numpy as np
+
+def document_vector(doc):
+    doc = word_tokenize(doc.lower())
+    return np.mean([model.wv[word] for word in doc if word in model.wv], axis=0)
+print("Document vector:\n", document_vector(documents[0]))
