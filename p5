@@ -1,0 +1,25 @@
+# Define the add-delete table
+add_delete_table = [
+    {"suffix": "ing", "delete": "ing", "add": ""},
+    {"suffix": "ed", "delete": "ed", "add": ""},
+    {"suffix": "s", "delete": "s", "add": ""},
+    {"suffix": "ly", "delete": "ly", "add": ""},
+    {"suffix": "er", "delete": "er", "add": ""},
+    {"suffix": "ion", "delete": "ion", "add": "e"},
+]
+
+def apply_add_delete(word):
+    for rule in add_delete_table:
+        suffix = rule["suffix"]
+        if word.endswith(suffix):
+            base = word[: -len(rule["delete"])] + rule["add"]
+            return base
+    return word  # Return original if no rule applies
+
+# Test words
+words = ["playing", "walked", "runs", "quickly", "faster", "action", "decorated"]
+
+# Apply transformation
+for word in words:
+    root = apply_add_delete(word)
+    print(f"{word} → {root}")
