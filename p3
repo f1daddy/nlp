@@ -1,0 +1,50 @@
+import pandas as pd
+import re
+import nltk
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import joblib
+
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+data = {
+    'text': ["I love programming in Python!", "Machine learning is amazing.", "Python is great for data science."],
+    'label': ['positive', 'positive', 'neutral']
+}
+df = pd.DataFrame(data)
+
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
+    text = re.sub(r'\d+', '', text)      # Remove numbers
+    return text
+
+df['clean_text'] = df['text'].apply(clean_text)
+
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('english'))
+
+def lemmatize_and_remove_stopwords(text):
+    tokens = nltk.word_tokenize(text)
+    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    return ' '.join(tokens)
+
+df['processed_text'] = df['clean_text'].apply(lemmatize_and_remove_stopwords)
+
+le = LabelEncoder()
+df['encoded_label'] = le.fit_transform(df['label'])
+
+vectorizer = TfidfVectorizer()
+X_tfidf = vectorizer.fit_transform(df['processed_text'])
+
+df.to_csv("processed_text.csv", index=False)
+joblib.dump(le, 'label_encoder.pkl')
+joblib.dump(vectorizer, 'tfidf_vectorizer.pkl')
+joblib.dump(X_tfidf, 'tfidf_vectors.pkl')
+
+print("Processing complete. Files saved: processed_text.csv, label_encoder.pkl, tfidf_vectorizer.pkl, tfidf_vectors.pkl")
